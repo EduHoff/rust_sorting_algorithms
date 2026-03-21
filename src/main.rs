@@ -1,5 +1,5 @@
 use clearscreen::clear;
-use rust_sorting_algorithms::sort::bubble_sort;
+use rust_sorting_algorithms::{aux::generate_data, sort::bubble_sort};
 
 
 fn main() {
@@ -13,4 +13,6 @@ fn main() {
     let result = bubble_sort::sort(array_teste);
 
     result.print_full();
+
+    generate_data::generate_data(0, 10);
 }
