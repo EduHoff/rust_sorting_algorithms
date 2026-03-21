@@ -1,3 +1,5 @@
+use std::path::Path;
+
 use clearscreen::clear;
 use rust_sorting_algorithms::{aux::generate_data, sort::bubble_sort};
 
@@ -5,6 +7,10 @@ use rust_sorting_algorithms::{aux::generate_data, sort::bubble_sort};
 fn main() {
     clear().expect("clearscreen should be able to clear screen");
 
+    if !Path::new("in.csv").exists() {
+        println!("File in.csv do not exists! Trying to create file.");
+        generate_data::generate_data(0, 10);
+    }
     
     let array_teste: Vec<i32> = (1..=10).rev().collect();
 
@@ -14,5 +20,5 @@ fn main() {
 
     result.print_full();
 
-    generate_data::generate_data(0, 10);
+     
 }
