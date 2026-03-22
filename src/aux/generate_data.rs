@@ -3,12 +3,12 @@ use rand::thread_rng;
 use std::fs::File;
 use std::io::{BufWriter, Write};
 
-pub fn generate_data(min: u32, max: u32){
+pub fn generate_data(min: u32, max: u32, path: &str){
 
     let mut nums: Vec<u32> = (min..=max).collect();
     nums.shuffle(&mut thread_rng());
 
-    let file = match File::create("in.csv"){
+    let file = match File::create(path){
         Ok(f) => f,
         Err(e) => {
             eprintln!("Failed to create file: {}", e);

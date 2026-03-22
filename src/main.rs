@@ -53,7 +53,7 @@ fn main() {
             mem::swap(&mut min, &mut max);
         }
         
-        generate_data::generate_data(min, max);
+        generate_data::generate_data(min, max, PATH);
     }
     
 
