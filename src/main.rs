@@ -1,7 +1,9 @@
 use std::{io::Write, mem, path::Path};
 
 use clearscreen::clear;
-use rust_sorting_algorithms::{aux::{generate_data, read_input}, sort::bubble_sort};
+use rust_sorting_algorithms::{aux::{generate_array::generate_array, generate_data, read_input}, sort::bubble_sort};
+
+const PATH: &str = "in.csv";
 
 
 fn main() {
@@ -9,7 +11,7 @@ fn main() {
 
     let mut min: u32 = 0;
     let mut max: u32 = 0;
-    if !Path::new("in.csv").exists() {
+    if !Path::new(PATH).exists() {
         eprintln!("File in.csv do not exists!");
         loop {
             println!("Enter the minimum value:");
@@ -57,13 +59,13 @@ fn main() {
 
 
     clear().expect("Error: clear failed");
-    let array_teste: Vec<i32> = (1..=10).rev().collect();
+    let array: Vec<u32> = generate_array(PATH);
 
-    println!("Original: {:?}\n", array_teste);
+    println!("Original: {:?}\n", array);
 
     println!("min: {}, max: {};", min, max);
 
-    let result = bubble_sort::sort(array_teste);
+    let result = bubble_sort::sort(array);
 
     result.print_full();
 

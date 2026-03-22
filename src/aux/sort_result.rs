@@ -1,3 +1,5 @@
+use num_format::{Locale, ToFormattedString};
+
 pub struct SortResult<T> {
     pub array: Vec<T>,
     pub algorithm: String,
@@ -50,8 +52,8 @@ impl<T: std::fmt::Debug> SortResult<T> {
     pub fn print_stats(&self) {
         println!("--- Statistics ---");
         println!("Algorithm:   {}", self.algorithm);
-        println!("Comparisons: {}", self.comparisons);
-        println!("Swaps:       {}", self.swaps);
+        println!("Comparisons: {}", self.comparisons.to_formatted_string(&Locale::en));
+        println!("Swaps:       {}", self.swaps.to_formatted_string(&Locale::en));
         println!("Duration:    {}", self.format_duration());
         println!("------------------");
     }

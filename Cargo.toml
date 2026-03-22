@@ -6,3 +6,4 @@ edition = "2024"
 [dependencies]
 clearscreen = "4.0"
 rand="0.8"
+num-format = "0.4"
