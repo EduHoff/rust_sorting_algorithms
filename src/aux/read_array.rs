@@ -1,7 +1,7 @@
 use std::{fs, str::FromStr};
 
 
-pub fn generate_array<T: PartialOrd + Copy + FromStr>(path: &str) -> Vec<T>{
+pub fn read_array<T: PartialOrd + Copy + FromStr>(path: &str) -> Vec<T>{
 
 
     let content = fs::read_to_string(path);
