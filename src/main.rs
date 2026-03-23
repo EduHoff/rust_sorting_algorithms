@@ -1,7 +1,7 @@
 use std::{io::Write, mem, path::Path};
 
 use clearscreen::clear;
-use rust_sorting_algorithms::{aux::{generate_data, read_array::read_array, read_input, write_array}, sort::bubble_sort};
+use rust_sorting_algorithms::{aux::{generate_data, read_array::read_array, read_input, write_array}, sort::{bubble_sort, selection_sort}};
 
 const PATH_IN: &str = "in.csv";
 const PATH_OUT: &str = "out.csv";
@@ -62,7 +62,8 @@ fn main() {
     clear().expect("Error: clear failed");
     let array: Vec<u32> = read_array(PATH_IN);
 
-    let result = bubble_sort::sort(array);
+    //let result = bubble_sort::sort(array);
+    let result = selection_sort::sort(array);
 
     clear().expect("Error: clear failed");
     result.print_stats();

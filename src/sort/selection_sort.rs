@@ -15,25 +15,27 @@ pub fn sort<T: PartialOrd + Copy>(mut array: Vec<T>) -> SortResult<T> {
     let mut swaps: u64 = 0;
 
     let start = Instant::now();
-    
-    for i in 0..array.len(){
-        let mut swapped = false;
 
-        for j in 0..(array.len()-(i+1)){
+    for i in 0..array.len(){
+        let mut min_index = i;
+
+        for j in (i+1)..array.len(){
             comparisons += 1;
 
-            if array[j] > array[j+1]{
-                let aux = array[j];
-                array[j] = array[j+1];
-                array[j+1] = aux;
-
-                swaps += 1;
-                swapped=true;
+            if array[j] < array[min_index]{
+                min_index = j;
             }
         }
 
+        if min_index != i {
+            let aux = array[min_index];
+            array[min_index] = array[i];
+            array[i] = aux;
+            
+            swaps += 1;
+        }
+        
         pb.set_position(i as u64);
-        if !swapped {break};
     }
 
     let duration = start.elapsed().as_nanos() as u128;
@@ -41,8 +43,8 @@ pub fn sort<T: PartialOrd + Copy>(mut array: Vec<T>) -> SortResult<T> {
 
     SortResult {
         array,
-        algorithm: String::from("Bubble Sort"),
-        comparisons,
+        algorithm: String::from("Selection Sort"),
+        comparisons: comparisons,
         swaps,
         duration,
     }
