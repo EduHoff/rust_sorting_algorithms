@@ -1,19 +1,19 @@
 use std::{io::Write, mem, path::Path};
 
 use clearscreen::clear;
-use rust_sorting_algorithms::{aux::{generate_data, read_array::read_array, read_input, write_array}, sort::{bubble_sort, selection_sort}};
+use rust_sorting_algorithms::{aux::{generate_data, read_array::read_array, read_input, sort_result::SortResult, write_array}, sort::{bubble_sort, selection_sort}};
 
 const PATH_IN: &str = "in.csv";
 const PATH_OUT: &str = "out.csv";
 
-
 fn main() {
-    clear().expect("Error: clear failed");
-
+    
     let mut min;
     let mut max;
+
+    clear().expect("Error: clear failed");
     if !Path::new(PATH_IN).exists() {
-        eprintln!("File in.csv do not exists!");
+        eprintln!("File in.csv do not exists!\n");
         loop {
             println!("Enter the minimum value:");
             print!("||");
@@ -32,7 +32,8 @@ fn main() {
             };
         }
 
-        loop {
+        clear().expect("Error: clear failed");
+        loop { 
             println!("Enter the maximum value:");
             print!("||");
             std::io::stdout().flush().unwrap();
@@ -56,14 +57,48 @@ fn main() {
         
         generate_data::generate_data(min, max, PATH_IN);
     }
-    
 
 
-    clear().expect("Error: clear failed");
     let array: Vec<u32> = read_array(PATH_IN);
+    let result: SortResult<u32>;
+    
+    clear().expect("Error: clear failed");
+    loop {
+print!("
+============================================
+            Sorting Algorithms
+============================================
+1 - Bubble Sort
+2 - Selection Sort
+3 - Coming soon...
+0 - Exit
+===========================================
+");
+        print!("||");
+        std::io::stdout().flush().unwrap();
 
-    //let result = bubble_sort::sort(array);
-    let result = selection_sort::sort(array);
+        match read_input::read_input(){
+            Ok(choose) => {
+                result = match choose {
+                    1 => {clear().expect("Error: clear failed"); bubble_sort::sort(array)},
+                    2 => {clear().expect("Error: clear failed"); selection_sort::sort(array)},
+                    0 => return,
+                    _ => {
+                        clear().expect("Error: clear failed");
+                        println!("Invalid option!");
+                        continue;
+                    }
+                };
+
+                break;
+            }
+            Err(e) => {
+                clear().expect("Error: clear failed");
+                eprintln!("{}", e);
+            }                
+        };
+    }
+
 
     clear().expect("Error: clear failed");
     result.print_stats();
