@@ -10,8 +10,8 @@ const PATH_OUT: &str = "out.csv";
 fn main() {
     clear().expect("Error: clear failed");
 
-    let mut min: u32 = 0;
-    let mut max: u32 = 0;
+    let mut min;
+    let mut max;
     if !Path::new(PATH_IN).exists() {
         eprintln!("File in.csv do not exists!");
         loop {

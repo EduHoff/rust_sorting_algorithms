@@ -1,4 +1,6 @@
 use num_format::{Locale, ToFormattedString};
+use sysinfo::System;
+use wgpu::Instance;
 
 pub struct SortResult<T> {
     pub array: Vec<T>,
@@ -6,6 +8,51 @@ pub struct SortResult<T> {
     pub comparisons: u64,
     pub swaps: u64,
     pub duration: u128,
+}
+
+struct SystemInfo {
+    pub os: String,
+    pub cpu: String,
+    pub ram_gb: u64,
+}
+
+fn get_system_info() -> SystemInfo {
+    let mut sys = System::new_all();
+    sys.refresh_all();
+
+    let os = System::name().unwrap_or("Unknown OS".to_string());
+    let os_version = System::os_version().unwrap_or("Unknown Version".to_string());
+    let full_os = format!("{} {}", os, os_version);
+
+    let cpu = sys
+        .cpus()
+        .first()
+        .map(|c| c.brand().to_string())
+        .unwrap_or("Unknown CPU".to_string());
+
+    let total_ram = sys.total_memory();
+    let ram_gb = total_ram / 1024 / 1024 / 1024;
+
+    SystemInfo {
+        os: full_os,
+        cpu,
+        ram_gb,
+    }
+}
+
+
+fn get_gpu_name() -> String {
+    let instance = Instance::default();
+
+    let adapter = pollster::block_on(instance.request_adapter(&Default::default()));
+
+    match adapter {
+        Some(adapter) => {
+            let info = adapter.get_info();
+            info.name
+        }
+        None => "Unknown GPU".to_string(),
+    }
 }
 
 impl<T: std::fmt::Debug> SortResult<T> {
@@ -55,6 +102,14 @@ impl<T: std::fmt::Debug> SortResult<T> {
         println!("Comparisons: {}", self.comparisons.to_formatted_string(&Locale::en));
         println!("Swaps:       {}", self.swaps.to_formatted_string(&Locale::en));
         println!("Duration:    {}", self.format_duration());
+        
+        let sys = get_system_info();
+        let gpu = get_gpu_name(); 
+        println!("\n--- System Info ---");
+        println!("OS:  {}", sys.os);
+        println!("CPU: {}", sys.cpu);
+        println!("GPU: {}", gpu);
+        println!("RAM: {} GiB", sys.ram_gb);
         println!("------------------");
     }
 }
