@@ -62,12 +62,9 @@ fn main() {
     clear().expect("Error: clear failed");
     let array: Vec<u32> = read_array(PATH_IN);
 
-    //println!("Original: {:?}\n", array);
-
-    //println!("min: {}, max: {};", min, max);
-
     let result = bubble_sort::sort(array);
 
+    clear().expect("Error: clear failed");
     result.print_stats();
     write_array::write_array(&result.array, PATH_OUT);
 }
