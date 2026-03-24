@@ -42,7 +42,6 @@ pub fn generate_data(min: u32, max: u32, path: &str){
         Ok(_) => {},
         Err(e) => {
             eprintln!("Failed to flush buffer: {}", e);
-            return;
         }
     }
 }

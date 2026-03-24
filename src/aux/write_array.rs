@@ -1,7 +1,7 @@
 use std::fs::File;
 use std::io::{BufWriter, Write};
 
-pub fn write_array<T: std::fmt::Display> (array: &Vec<T>, path: &str){
+pub fn write_array<T: std::fmt::Display> (array: &[T], path: &str){
 
     let file = match File::create(path) {
         Ok(f) => f,
@@ -14,11 +14,9 @@ pub fn write_array<T: std::fmt::Display> (array: &Vec<T>, path: &str){
     let mut writer = BufWriter::new(file);
 
     for (i, num) in array.iter().enumerate() {
-        if i > 0 {
-            if let Err(e) = write!(writer, ",") {
-                eprintln!("Failed to write comma: {}", e);
-                return;
-            }
+        if i > 0 && let Err(e) = write!(writer, ",") {
+            eprintln!("Failed to write comma: {}", e);
+            return;
         }
 
         if let Err(e) = write!(writer, "{}", num) {

@@ -7,6 +7,8 @@ pub struct SortResult<T> {
     pub algorithm: String,
     pub comparisons: u64,
     pub swaps: u64,
+    pub shifts: u64,
+    pub insertions: u64,
     pub duration: u128,
 }
 
@@ -100,7 +102,9 @@ impl<T: std::fmt::Debug> SortResult<T> {
         println!("--- Statistics ---");
         println!("Algorithm:   {}", self.algorithm);
         println!("Comparisons: {}", self.comparisons.to_formatted_string(&Locale::en));
-        println!("Swaps:       {}", self.swaps.to_formatted_string(&Locale::en));
+        if self.swaps > 0 {println!("Swaps:       {}", self.swaps.to_formatted_string(&Locale::en))};
+        if self.shifts > 0 {println!("Shifts:      {}", self.shifts.to_formatted_string(&Locale::en))};
+        if self.insertions > 0 {println!("Insertions:  {}", self.insertions.to_formatted_string(&Locale::en))};
         println!("Duration:    {}", self.format_duration());
         
         let sys = get_system_info();
