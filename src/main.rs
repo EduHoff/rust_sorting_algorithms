@@ -1,7 +1,7 @@
 use std::{io::Write, mem, path::Path};
 
 use clearscreen::clear;
-use rust_sorting_algorithms::{aux::{generate_data, read_array::read_array, read_input, sort_result::SortResult, write_array}, sort::{bubble_sort, insertion_sort, selection_sort}};
+use rust_sorting_algorithms::{aux::{generate_data, read_array::read_array, read_input, sort_result::SortResult, write_array}, sort::{bubble_sort, insertion_sort, merge_sort, selection_sort}};
 
 const PATH_IN: &str = "in.csv";
 const PATH_OUT: &str = "out.csv";
@@ -71,7 +71,9 @@ print!("
 1 - Bubble Sort
 2 - Selection Sort
 3 - Insertion Sort
-4 - Coming soon...
+4 - ???
+5 - Merge Sort
+6 - Coming soon...
 0 - Exit
 ===========================================
 ");
@@ -84,6 +86,8 @@ print!("
                     1 => {clear().expect("Error: clear failed"); bubble_sort::sort(array)},
                     2 => {clear().expect("Error: clear failed"); selection_sort::sort(array)},
                     3 => {clear().expect("Error: clear failed"); insertion_sort::sort(array)},
+                    //algo vai ficar aqui
+                    5 => {clear().expect("Error: clear failed"); merge_sort::sort(array)},
                     0 => return,
                     _ => {
                         clear().expect("Error: clear failed");

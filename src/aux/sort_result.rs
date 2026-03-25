@@ -10,17 +10,18 @@ use wgpu::Instance;
 pub struct SortResult<T> {
     pub array: Vec<T>,
     pub algorithm: String,
-    pub comparisons: u64,
-    pub swaps: u64,
-    pub shifts: u64,
-    pub insertions: u64,
-    pub duration: u128,
+    pub comparisons: usize,
+    pub swaps: usize,
+    pub shifts: usize,
+    pub insertions: usize,
+    pub moves: usize,
+    pub duration: usize,
 }
 
 struct SystemInfo {
     pub os: String,
     pub cpu: String,
-    pub ram_gb: u64,
+    pub ram_gb: usize,
 }
 
 fn get_system_info() -> SystemInfo {
@@ -37,8 +38,8 @@ fn get_system_info() -> SystemInfo {
         .map(|c| c.brand().to_string())
         .unwrap_or("Unknown CPU".to_string());
 
-    let total_ram = sys.total_memory();
-    let ram_gb = total_ram / 1024 / 1024 / 1024;
+    let total_ram: usize = sys.total_memory() as usize;
+    let ram_gb: usize = total_ram / 1024 / 1024 / 1024;
 
     SystemInfo {
         os: full_os,
@@ -65,9 +66,6 @@ fn get_gpu_name() -> String {
 fn get_ram_type() -> String {
     
     // ================= WINDOWS =================
-
-    
-
     #[cfg(windows)]
     {
         use std::process::Command;
@@ -226,6 +224,7 @@ impl<T: std::fmt::Debug> SortResult<T> {
         if self.swaps > 0 {writeln!(writer, "Swaps:       {}", self.swaps.to_formatted_string(&Locale::en))?;}
         if self.shifts > 0 {writeln!(writer, "Shifts:      {}", self.shifts.to_formatted_string(&Locale::en))?;}
         if self.insertions > 0 {writeln!(writer, "Insertions:  {}", self.insertions.to_formatted_string(&Locale::en))?;}
+        if self.moves > 0 {writeln!(writer, "Moves:       {}", self.moves.to_formatted_string(&Locale::en))?;}
         writeln!(writer, "Duration:    {}", self.format_duration())?;
 
         writeln!(writer, "\n--- System Info ---")?;

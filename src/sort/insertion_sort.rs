@@ -11,10 +11,11 @@ pub fn sort<T: PartialOrd + Copy>(mut array: Vec<T>) -> SortResult<T> {
         .unwrap()
         .progress_chars("#>-"));
 
-    let mut comparisons: u64 = 0;
-    let swaps: u64 = 0;
-    let mut shifts: u64 = 0;
-    let mut insertions: u64 = 0;
+    let mut comparisons: usize = 0;
+    let swaps: usize = 0;
+    let mut shifts: usize = 0;
+    let mut insertions: usize = 0;
+    let moves: usize = 0;
 
     let start = Instant::now();
     
@@ -46,7 +47,7 @@ pub fn sort<T: PartialOrd + Copy>(mut array: Vec<T>) -> SortResult<T> {
         pb.set_position(i as u64);
     }
 
-    let duration = start.elapsed().as_nanos();
+    let duration: usize = start.elapsed().as_nanos() as usize;
     pb.finish_with_message("Sorting completed!");
 
     SortResult {
@@ -56,6 +57,7 @@ pub fn sort<T: PartialOrd + Copy>(mut array: Vec<T>) -> SortResult<T> {
         swaps,
         shifts,
         insertions,
+        moves,
         duration,
     }
 }
