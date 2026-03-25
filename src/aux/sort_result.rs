@@ -1,3 +1,8 @@
+use std::fs::{File, OpenOptions, create_dir_all};
+use std::io::{BufWriter, Write};
+use std::path::Path;
+
+
 use num_format::{Locale, ToFormattedString};
 use sysinfo::System;
 use wgpu::Instance;
@@ -57,8 +62,125 @@ fn get_gpu_name() -> String {
     }
 }
 
-impl<T: std::fmt::Debug> SortResult<T> {
+fn get_ram_type() -> String {
     
+    // ================= WINDOWS =================
+
+    
+
+    #[cfg(windows)]
+    {
+        use std::process::Command;
+
+        let map_smbios_type = |code: &str| -> String {
+            match code.trim() {
+                "20" => "DDR".to_string(),
+                "21" => "DDR2".to_string(),
+                "24" => "DDR3".to_string(),
+                "26" => "DDR4".to_string(),
+                "30" => "LPDDR4".to_string(),
+                "34" => "DDR5".to_string(),
+                "35" => "LPDDR5".to_string(),
+                _ => format!("RAM ({})", code),
+            }
+        };
+
+        let output = Command::new("powershell")
+            .args(["-Command", "Get-CimInstance Win32_PhysicalMemory | Select-Object -ExpandProperty SMBIOSMemoryType"])
+            .output();
+
+        if let Ok(out) = output {
+            let code = String::from_utf8_lossy(&out.stdout).trim().to_string();
+            if !code.is_empty() {
+                return map_smbios_type(&code);
+            }
+        }
+
+        let wmic_output = Command::new("cmd")
+            .args(["/C", "wmic memorychip get smbiosmemorytype"])
+            .output();
+
+        if let Ok(out) = wmic_output {
+            let text = String::from_utf8_lossy(&out.stdout);
+            for line in text.lines() {
+                let line = line.trim();
+
+                if !line.is_empty() && line.chars().all(|c| c.is_numeric()) {
+                    return map_smbios_type(line);
+                }
+            }
+        }
+
+        return "Unknown (Virtual/Generic)".to_string(); 
+    }
+    
+
+    // ================= LINUX / BSD =================
+    #[cfg(all(unix, not(target_os = "macos")))]
+    {
+        use std::process::Command;
+
+        let output = Command::new("dmidecode")
+            .args(["-t", "memory"])
+            .output();
+
+        match output {
+            Ok(out) => {
+                if out.status.success() {
+                    let text = String::from_utf8_lossy(&out.stdout);
+
+                    for line in text.lines() {
+                        let line = line.trim();
+
+                        if line.starts_with("Type:") && !line.contains("Unknown") && let Some(t) = line.split(':').nth(1) {
+                            return t.trim().to_string();
+                        }
+                    }
+       
+                    return "Unknown".to_string()
+                } else {
+                    return "Unknown (requires root)".to_string()
+                }
+            }
+            Err(_) => {
+                return "Unknown (dmidecode not found)".to_string()
+            }
+        }
+    }
+    
+    // ================= MAC =================
+    #[cfg(target_os = "macos")]
+    {
+        use std::process::Command;
+        
+        let output = Command::new("system_profiler")
+            .arg("SPMemoryDataType")
+            .output();
+
+        if let Ok(out) = output && out.status.success() {
+            let text = String::from_utf8_lossy(&out.stdout);
+
+            for line in text.lines() {
+                let line = line.trim();
+
+                if line.starts_with("Type:") && let Some(t) = line.split(':').nth(1) {
+                    let ram_type = t.trim();
+                    if !ram_type.is_empty() && ram_type != "Unknown" {
+                        return ram_type.to_string();
+                    }
+                }
+            }
+            return "Unknown (Memory Type not found)".to_string();
+        }
+
+        return "Unknown (MacOS Profiler Error)".to_string();
+    }
+
+    #[allow(unreachable_code)]
+    "Unsupported OS".to_string()
+}
+
+impl<T: std::fmt::Debug> SortResult<T> {
 
     fn format_duration(&self) -> String {
         let total_nanos = self.duration;
@@ -92,6 +214,30 @@ impl<T: std::fmt::Debug> SortResult<T> {
         }
     }
 
+
+    fn write_stats<W: Write>(&self, writer: &mut W) -> Result<(), std::io::Error> {
+        let sys = get_system_info();
+        let gpu = get_gpu_name();
+        let ram_type = get_ram_type();
+
+        writeln!(writer, "--- Statistics ---")?;
+        writeln!(writer, "Algorithm:   {}", self.algorithm)?;
+        writeln!(writer, "Comparisons: {}", self.comparisons.to_formatted_string(&Locale::en))?;
+        if self.swaps > 0 {writeln!(writer, "Swaps:       {}", self.swaps.to_formatted_string(&Locale::en))?;}
+        if self.shifts > 0 {writeln!(writer, "Shifts:      {}", self.shifts.to_formatted_string(&Locale::en))?;}
+        if self.insertions > 0 {writeln!(writer, "Insertions:  {}", self.insertions.to_formatted_string(&Locale::en))?;}
+        writeln!(writer, "Duration:    {}", self.format_duration())?;
+
+        writeln!(writer, "\n--- System Info ---")?;
+        writeln!(writer, "OS:  {}", sys.os)?;
+        writeln!(writer, "CPU: {}", sys.cpu)?;
+        writeln!(writer, "GPU: {}", gpu)?;
+        writeln!(writer, "RAM: {} GiB {}", sys.ram_gb, ram_type)?;
+        writeln!(writer, "------------------")?;
+
+        Ok(())
+    }
+
     pub fn print_full(&self) {
         println!("=== Full Sort Report ===");
         println!("Array: {:?}", self.array);
@@ -99,21 +245,45 @@ impl<T: std::fmt::Debug> SortResult<T> {
     }
 
     pub fn print_stats(&self) {
-        println!("--- Statistics ---");
-        println!("Algorithm:   {}", self.algorithm);
-        println!("Comparisons: {}", self.comparisons.to_formatted_string(&Locale::en));
-        if self.swaps > 0 {println!("Swaps:       {}", self.swaps.to_formatted_string(&Locale::en))};
-        if self.shifts > 0 {println!("Shifts:      {}", self.shifts.to_formatted_string(&Locale::en))};
-        if self.insertions > 0 {println!("Insertions:  {}", self.insertions.to_formatted_string(&Locale::en))};
-        println!("Duration:    {}", self.format_duration());
-        
-        let sys = get_system_info();
-        let gpu = get_gpu_name(); 
-        println!("\n--- System Info ---");
-        println!("OS:  {}", sys.os);
-        println!("CPU: {}", sys.cpu);
-        println!("GPU: {}", gpu);
-        println!("RAM: {} GiB", sys.ram_gb);
-        println!("------------------");
+        let mut stdout = std::io::stdout();
+
+        if let Err(e) = self.write_stats(&mut stdout) {
+            eprintln!("Error writing to stdout: {}", e);
+        }
+    }
+
+    pub fn write_result(&self) -> Result<(), std::io::Error> {
+        let dir = Path::new("sort_logs");
+        create_dir_all(dir)?;
+
+        let filename = format!("{}.log", self.algorithm.replace(" ", "_"));
+        let path = dir.join(filename);
+
+        let file = File::create(&path)?;
+        let mut writer = BufWriter::new(file);
+
+        self.write_stats(&mut writer)?;
+        writer.flush()?;
+        Ok(())
+    }
+
+    pub fn write_history(&self) -> Result<(), std::io::Error> {
+        let dir = Path::new("sort_logs");
+        create_dir_all(dir)?;
+
+        let path = dir.join("sorting_history.log");
+
+        let file = OpenOptions::new()
+            .create(true)
+            .append(true)
+            .open(&path)?;
+
+        let mut writer = BufWriter::new(file);
+
+        self.write_stats(&mut writer)?;
+        writeln!(writer, "\n")?;
+
+        writer.flush()?;
+        Ok(())
     }
 }

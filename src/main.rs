@@ -105,4 +105,16 @@ print!("
     clear().expect("Error: clear failed");
     result.print_stats();
     write_array::write_array(&result.array, PATH_OUT);
+    
+    if let Err(e) = result.write_result() {
+        eprintln!("Error writing log: {}", e);
+    }
+
+    if let Err(e) = result.write_history() {
+        eprintln!("Error writing log: {}", e);
+    }
+
+    #[cfg(windows)]
+    let _ = std::process::Command::new("cmd").arg("/c").arg("pause").status();
+    //cargo cross build --release --target x86_64-pc-windows-gnu
 }

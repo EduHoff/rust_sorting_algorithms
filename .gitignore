@@ -1,3 +1,5 @@
 /target
 in.csv
 out.csv
+*.log
+/sort_logs
