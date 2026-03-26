@@ -1,11 +1,17 @@
+use indicatif::{ProgressBar, ProgressStyle};
 use rand::seq::SliceRandom;
 use rand::thread_rng;
 use std::fs::File;
 use std::io::{BufWriter, Write};
 
-pub fn generate_data(min: u32, max: u32, path: &str){
+pub fn generate_data(min: usize, max: usize, path: &str){
 
-    let mut nums: Vec<u32> = (min..=max).collect();
+    let pb = ProgressBar::new((max-min+1) as u64);
+    pb.set_style(ProgressStyle::with_template("{spinner:.green} [{elapsed_precise}] [{bar:40.cyan/blue}] {pos}/{len} ({eta})")
+        .unwrap()
+        .progress_chars("#>-"));    
+
+    let mut nums: Vec<usize> = (min..=max).collect();
     nums.shuffle(&mut thread_rng());
 
     let file = match File::create(path){
@@ -36,7 +42,11 @@ pub fn generate_data(min: u32, max: u32, path: &str){
                 return;
             }    
         }
+
+        pb.set_position(i as u64);
     }
+
+    pb.finish_with_message("data generation completed!");
 
     match writer.flush(){
         Ok(_) => {},

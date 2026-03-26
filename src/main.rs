@@ -8,8 +8,8 @@ const PATH_OUT: &str = "out.csv";
 
 fn main() {
     
-    let mut min;
-    let mut max;
+    let mut min: usize;
+    let mut max: usize;
 
     clear().expect("Error: clear failed");
     if !Path::new(PATH_IN).exists() {
@@ -55,6 +55,7 @@ fn main() {
             mem::swap(&mut min, &mut max);
         }
         
+        clear().expect("Error: clear failed");
         generate_data::generate_data(min, max, PATH_IN);
     }
 

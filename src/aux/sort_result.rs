@@ -88,7 +88,14 @@ fn get_ram_type() -> String {
             .output();
 
         if let Ok(out) = output {
-            let code = String::from_utf8_lossy(&out.stdout).trim().to_string();
+            let stdout = String::from_utf8_lossy(&out.stdout);
+
+            let code = stdout
+                .lines()
+                .map(|l| l.trim())
+                .find(|l| !l.is_empty())
+                .unwrap_or("");
+
             if !code.is_empty() {
                 return map_smbios_type(&code);
             }
