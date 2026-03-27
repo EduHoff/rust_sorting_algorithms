@@ -25,7 +25,7 @@ pub fn sort<T: PartialOrd + Copy>(mut array: Vec<T>) -> SortResult<T> {
         for j in 0..(array.len()-(i+1)){
             comparisons += 1;
 
-            if array[j] > array[j+1]{
+            if array[j] < array[j+1]{
                 let aux = array[j];
                 array[j] = array[j+1];
                 array[j+1] = aux;
@@ -51,5 +51,26 @@ pub fn sort<T: PartialOrd + Copy>(mut array: Vec<T>) -> SortResult<T> {
         insertions,
         moves,
         duration,
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn sort_array() {
+
+        let array: Vec<i32> = (1..10).rev().collect();
+
+        let result = sort(array);
+        let expected: Vec<i32> = (1..10).collect();
+
+        assert_eq!(
+            result.array, 
+            expected, 
+            "\nAlgorithm: {}\nStatus: FAILED\nExpected: {:?}\nFound: {:?}\nMetrics: {:?}", 
+            result.algorithm, expected, result.array, result
+        );
     }
 }

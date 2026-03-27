@@ -58,3 +58,24 @@ pub fn sort<T: PartialOrd + Copy>(mut array: Vec<T>) -> SortResult<T> {
         duration,
     }
 }
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn sort_array() {
+
+        let array: Vec<i32> = (1..10).rev().collect();
+
+        let result = sort(array);
+        let expected: Vec<i32> = (1..10).collect();
+
+        assert_eq!(
+            result.array, 
+            expected, 
+            "\nAlgorithm: {}\nStatus: FAILED\nExpected: {:?}\nFound: {:?}\nMetrics: {:?}", 
+            result.algorithm, expected, result.array, result
+        );
+    }
+}

@@ -7,6 +7,7 @@ use num_format::{Locale, ToFormattedString};
 use sysinfo::System;
 use wgpu::Instance;
 
+#[derive(Debug)]
 pub struct SortResult<T> {
     pub array: Vec<T>,
     pub algorithm: String,
