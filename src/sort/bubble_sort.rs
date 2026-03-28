@@ -26,9 +26,7 @@ pub fn sort<T: PartialOrd + Copy>(mut array: Vec<T>) -> SortResult<T> {
             comparisons += 1;
 
             if array[j] < array[j+1]{
-                let aux = array[j];
-                array[j] = array[j+1];
-                array[j+1] = aux;
+                array.swap(j, j+1);
 
                 swaps += 1;
                 swapped=true;

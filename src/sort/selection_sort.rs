@@ -34,9 +34,7 @@ pub fn sort<T: PartialOrd + Copy>(mut array: Vec<T>) -> SortResult<T> {
         }
 
         if min_index != i {
-            let aux = array[min_index];
-            array[min_index] = array[i];
-            array[i] = aux;
+            array.swap(min_index, i);
 
             swaps += 1;
         }

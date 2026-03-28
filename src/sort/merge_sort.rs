@@ -5,7 +5,7 @@ use indicatif::{ProgressBar, ProgressStyle};
 use crate::aux::sort_result::SortResult;
 
 
-fn merge <T: PartialOrd + Copy>(array: &mut Vec<T>, index_left: usize, index_right: usize, index_middle: usize, comparisons:  &mut usize, moves:  &mut usize, pb: &ProgressBar){
+fn merge <T: PartialOrd + Copy>(array: &mut [T], index_left: usize, index_right: usize, index_middle: usize, comparisons:  &mut usize, moves:  &mut usize, pb: &ProgressBar){
 
     let left_array_len: usize = index_middle - index_left + 1;
     let right_array_len: usize = index_right - index_middle;
