@@ -109,6 +109,7 @@ pub fn sort<T: PartialOrd + Copy>(mut array: Vec<T>) -> SortResult<T> {
     let shifts: usize = 0;
     let insertions: usize = 0;
     let mut moves: usize = 0;
+    let attempts: usize = 0;
 
     let start = Instant::now();
 
@@ -134,6 +135,7 @@ pub fn sort<T: PartialOrd + Copy>(mut array: Vec<T>) -> SortResult<T> {
         shifts,
         insertions,
         moves,
+        attempts,
         duration,
     }
 }

@@ -5,7 +5,9 @@ use rust_sorting_algorithms::{
     aux::{
         generate_data, read_array::read_array, read_input, sort_result::SortResult, write_array,
     },
-    sort::{bubble_sort, insertion_sort, merge_sort, quick_sort, selection_sort, shell_sort},
+    sort::{
+        bogo_sort, bubble_sort, insertion_sort, merge_sort, quick_sort, selection_sort, shell_sort,
+    },
 };
 
 const PATH_IN: &str = "in.csv";
@@ -73,7 +75,7 @@ fn main() {
 ============================================
             Sorting Algorithms
 ============================================
- 1 - ???
+ 1 - Bogo Sort
  2 - Bubble Sort
  3 - Selection Sort
  4 - Insertion Sort
@@ -93,7 +95,10 @@ fn main() {
         match read_input::read_input() {
             Ok(choose) => {
                 result = match choose {
-                    //Bogo Sort
+                    1 => {
+                        clear().expect("Error: clear failed");
+                        bogo_sort::sort(array)
+                    }
                     2 => {
                         clear().expect("Error: clear failed");
                         bubble_sort::sort(array)

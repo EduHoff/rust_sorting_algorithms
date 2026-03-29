@@ -15,6 +15,7 @@ pub struct SortResult<T> {
     pub shifts: usize,
     pub insertions: usize,
     pub moves: usize,
+    pub attempts: usize,
     pub duration: usize,
 }
 
@@ -256,6 +257,13 @@ impl<T: std::fmt::Debug> SortResult<T> {
                 writer,
                 "Moves:       {}",
                 self.moves.to_formatted_string(&Locale::en)
+            )?;
+        }
+        if self.attempts > 0 {
+            writeln!(
+                writer,
+                "Attempts:    {}",
+                self.attempts.to_formatted_string(&Locale::en)
             )?;
         }
         writeln!(writer, "Duration:    {}", self.format_duration())?;
