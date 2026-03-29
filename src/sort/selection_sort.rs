@@ -63,16 +63,14 @@ mod tests {
 
     #[test]
     fn sort_array() {
-
         let array: Vec<i32> = (1..10).rev().collect();
 
         let result = sort(array);
         let expected: Vec<i32> = (1..10).collect();
 
         assert_eq!(
-            result.array, 
-            expected, 
-            "\nAlgorithm: {}\nStatus: FAILED\nExpected: {:?}\nFound: {:?}\nMetrics: {:?}", 
+            result.array, expected,
+            "\nAlgorithm: {}\nStatus: FAILED\nExpected: {:?}\nFound: {:?}\nMetrics: {:?}",
             result.algorithm, expected, result.array, result
         );
     }

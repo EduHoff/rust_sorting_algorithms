@@ -1,8 +1,7 @@
 use std::fs::File;
 use std::io::{BufWriter, Write};
 
-pub fn write_array<T: std::fmt::Display> (array: &[T], path: &str){
-
+pub fn write_array<T: std::fmt::Display>(array: &[T], path: &str) {
     let file = match File::create(path) {
         Ok(f) => f,
         Err(e) => {
@@ -14,7 +13,9 @@ pub fn write_array<T: std::fmt::Display> (array: &[T], path: &str){
     let mut writer = BufWriter::new(file);
 
     for (i, num) in array.iter().enumerate() {
-        if i > 0 && let Err(e) = write!(writer, ",") {
+        if i > 0
+            && let Err(e) = write!(writer, ",")
+        {
             eprintln!("Failed to write comma: {}", e);
             return;
         }
@@ -28,5 +29,4 @@ pub fn write_array<T: std::fmt::Display> (array: &[T], path: &str){
     if let Err(e) = writer.flush() {
         eprintln!("Failed to flush buffer: {}", e);
     }
-
 }

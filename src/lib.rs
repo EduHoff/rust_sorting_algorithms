@@ -1,2 +1,2 @@
-pub mod sort;
 pub mod aux;
+pub mod sort;

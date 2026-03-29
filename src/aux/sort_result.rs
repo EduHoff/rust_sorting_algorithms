@@ -2,7 +2,6 @@ use std::fs::{File, OpenOptions, create_dir_all};
 use std::io::{BufWriter, Write};
 use std::path::Path;
 
-
 use num_format::{Locale, ToFormattedString};
 use sysinfo::System;
 use wgpu::Instance;
@@ -49,7 +48,6 @@ fn get_system_info() -> SystemInfo {
     }
 }
 
-
 fn get_gpu_name() -> String {
     let instance = Instance::default();
 
@@ -65,7 +63,6 @@ fn get_gpu_name() -> String {
 }
 
 fn get_ram_type() -> String {
-    
     // ================= WINDOWS =================
     #[cfg(windows)]
     {
@@ -117,18 +114,15 @@ fn get_ram_type() -> String {
             }
         }
 
-        return "Unknown (Virtual/Generic)".to_string(); 
+        return "Unknown (Virtual/Generic)".to_string();
     }
-    
 
     // ================= LINUX / BSD =================
     #[cfg(all(unix, not(target_os = "macos")))]
     {
         use std::process::Command;
 
-        let output = Command::new("dmidecode")
-            .args(["-t", "memory"])
-            .output();
+        let output = Command::new("dmidecode").args(["-t", "memory"]).output();
 
         match output {
             Ok(out) => {
@@ -138,38 +132,43 @@ fn get_ram_type() -> String {
                     for line in text.lines() {
                         let line = line.trim();
 
-                        if line.starts_with("Type:") && !line.contains("Unknown") && let Some(t) = line.split(':').nth(1) {
+                        if line.starts_with("Type:")
+                            && !line.contains("Unknown")
+                            && let Some(t) = line.split(':').nth(1)
+                        {
                             return t.trim().to_string();
                         }
                     }
-       
-                    return "Unknown".to_string()
+
+                    return "Unknown".to_string();
                 } else {
-                    return "Unknown (requires root)".to_string()
+                    return "Unknown (requires root)".to_string();
                 }
             }
-            Err(_) => {
-                return "Unknown (dmidecode not found)".to_string()
-            }
+            Err(_) => return "Unknown (dmidecode not found)".to_string(),
         }
     }
-    
+
     // ================= MAC =================
     #[cfg(target_os = "macos")]
     {
         use std::process::Command;
-        
+
         let output = Command::new("system_profiler")
             .arg("SPMemoryDataType")
             .output();
 
-        if let Ok(out) = output && out.status.success() {
+        if let Ok(out) = output
+            && out.status.success()
+        {
             let text = String::from_utf8_lossy(&out.stdout);
 
             for line in text.lines() {
                 let line = line.trim();
 
-                if line.starts_with("Type:") && let Some(t) = line.split(':').nth(1) {
+                if line.starts_with("Type:")
+                    && let Some(t) = line.split(':').nth(1)
+                {
                     let ram_type = t.trim();
                     if !ram_type.is_empty() && ram_type != "Unknown" {
                         return ram_type.to_string();
@@ -187,7 +186,6 @@ fn get_ram_type() -> String {
 }
 
 impl<T: std::fmt::Debug> SortResult<T> {
-
     fn format_duration(&self) -> String {
         let total_nanos = self.duration;
 
@@ -220,7 +218,6 @@ impl<T: std::fmt::Debug> SortResult<T> {
         }
     }
 
-
     fn write_stats<W: Write>(&self, writer: &mut W) -> Result<(), std::io::Error> {
         let sys = get_system_info();
         let gpu = get_gpu_name();
@@ -228,11 +225,39 @@ impl<T: std::fmt::Debug> SortResult<T> {
 
         writeln!(writer, "--- Statistics ---")?;
         writeln!(writer, "Algorithm:   {}", self.algorithm)?;
-        writeln!(writer, "Comparisons: {}", self.comparisons.to_formatted_string(&Locale::en))?;
-        if self.swaps > 0 {writeln!(writer, "Swaps:       {}", self.swaps.to_formatted_string(&Locale::en))?;}
-        if self.shifts > 0 {writeln!(writer, "Shifts:      {}", self.shifts.to_formatted_string(&Locale::en))?;}
-        if self.insertions > 0 {writeln!(writer, "Insertions:  {}", self.insertions.to_formatted_string(&Locale::en))?;}
-        if self.moves > 0 {writeln!(writer, "Moves:       {}", self.moves.to_formatted_string(&Locale::en))?;}
+        writeln!(
+            writer,
+            "Comparisons: {}",
+            self.comparisons.to_formatted_string(&Locale::en)
+        )?;
+        if self.swaps > 0 {
+            writeln!(
+                writer,
+                "Swaps:       {}",
+                self.swaps.to_formatted_string(&Locale::en)
+            )?;
+        }
+        if self.shifts > 0 {
+            writeln!(
+                writer,
+                "Shifts:      {}",
+                self.shifts.to_formatted_string(&Locale::en)
+            )?;
+        }
+        if self.insertions > 0 {
+            writeln!(
+                writer,
+                "Insertions:  {}",
+                self.insertions.to_formatted_string(&Locale::en)
+            )?;
+        }
+        if self.moves > 0 {
+            writeln!(
+                writer,
+                "Moves:       {}",
+                self.moves.to_formatted_string(&Locale::en)
+            )?;
+        }
         writeln!(writer, "Duration:    {}", self.format_duration())?;
 
         writeln!(writer, "\n--- System Info ---")?;
@@ -280,10 +305,7 @@ impl<T: std::fmt::Debug> SortResult<T> {
 
         let path = dir.join("sorting_history.log");
 
-        let file = OpenOptions::new()
-            .create(true)
-            .append(true)
-            .open(&path)?;
+        let file = OpenOptions::new().create(true).append(true).open(&path)?;
 
         let mut writer = BufWriter::new(file);
 

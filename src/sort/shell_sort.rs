@@ -15,31 +15,40 @@ pub fn sort<T: PartialOrd + Copy>(mut array: Vec<T>) -> SortResult<T> {
     );
 
     let mut comparisons: usize = 0;
-    let mut swaps: usize = 0;
-    let shifts: usize = 0;
-    let insertions: usize = 0;
+    let swaps: usize = 0;
+    let mut shifts: usize = 0;
+    let mut insertions: usize = 0;
     let moves: usize = 0;
 
     let start = Instant::now();
 
-    for i in 0..array.len() {
-        let mut swapped = false;
+    let mut gap = 1;
+    while gap < array.len() {
+        gap = gap * 3 + 1;
+    }
 
-        for j in 0..(array.len() - (i + 1)) {
-            comparisons += 1;
-
-            if array[j] < array[j + 1] {
-                array.swap(j, j + 1);
-
-                swaps += 1;
-                swapped = true;
-            }
+    while gap >= 1 {
+        gap /= 3;
+        if gap == 0 {
+            break;
         }
 
-        pb.set_position(i as u64);
-        if !swapped {
-            break;
-        };
+        for i in gap..array.len() {
+            let key_array = array[i];
+            let mut j = i;
+
+            while j >= gap && array[j - gap] > key_array {
+                comparisons += 1;
+
+                array[j] = array[j - gap];
+
+                shifts += 1;
+                j -= gap;
+            }
+
+            array[j] = key_array;
+            insertions += 1;
+        }
     }
 
     let duration: usize = start.elapsed().as_nanos() as usize;
@@ -47,7 +56,7 @@ pub fn sort<T: PartialOrd + Copy>(mut array: Vec<T>) -> SortResult<T> {
 
     SortResult {
         array,
-        algorithm: String::from("Bubble Sort"),
+        algorithm: String::from("Shell Sort"),
         comparisons,
         swaps,
         shifts,

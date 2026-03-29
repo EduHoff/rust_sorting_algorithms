@@ -14,7 +14,5 @@ where
 
     let input = buffer.trim();
 
-    input
-        .parse::<T>()
-        .map_err(|e| format!("Error: {}", e))
+    input.parse::<T>().map_err(|e| format!("Error: {}", e))
 }
