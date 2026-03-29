@@ -4,6 +4,42 @@ use indicatif::{ProgressBar, ProgressStyle};
 
 use crate::aux::sort_result::SortResult;
 
+fn heapify_down<T: PartialOrd + Copy>(
+    array: &mut [T],
+    limit_tree: usize,
+    root: usize,
+    comparisons: &mut usize,
+    swaps: &mut usize,
+) {
+    let mut largest = root;
+    let left_child = 2 * root + 1;
+    let right_child = 2 * root + 2;
+
+    if left_child < limit_tree {
+        *comparisons += 1;
+
+        if array[left_child] > array[largest] {
+            largest = left_child;
+        }
+    }
+
+    if right_child < limit_tree {
+        *comparisons += 1;
+
+        if array[right_child] > array[largest] {
+            largest = right_child;
+        }
+    }
+
+    if largest != root {
+        array.swap(root, largest);
+
+        *swaps += 1;
+
+        heapify_down(array, limit_tree, largest, comparisons, swaps);
+    }
+}
+
 pub fn sort<T: PartialOrd + Copy>(mut array: Vec<T>) -> SortResult<T> {
     let pb = ProgressBar::new(array.len() as u64);
     pb.set_style(
@@ -23,24 +59,19 @@ pub fn sort<T: PartialOrd + Copy>(mut array: Vec<T>) -> SortResult<T> {
 
     let start = Instant::now();
 
-    for i in 0..array.len() {
-        let mut swapped = false;
+    let limit_tree = array.len();
 
-        for j in 0..(array.len() - (i + 1)) {
-            comparisons += 1;
+    for i in (0..limit_tree / 2).rev() {
+        heapify_down(&mut array, limit_tree, i, &mut comparisons, &mut swaps);
+    }
 
-            if array[j] < array[j + 1] {
-                array.swap(j, j + 1);
+    for i in (1..limit_tree).rev() {
+        array.swap(0, i);
 
-                swaps += 1;
-                swapped = true;
-            }
-        }
+        swaps += 1;
+        pb.set_position((limit_tree - i) as u64);
 
-        pb.set_position(i as u64);
-        if !swapped {
-            break;
-        };
+        heapify_down(&mut array, i, 0, &mut comparisons, &mut swaps);
     }
 
     let duration: usize = start.elapsed().as_nanos() as usize;
@@ -48,7 +79,7 @@ pub fn sort<T: PartialOrd + Copy>(mut array: Vec<T>) -> SortResult<T> {
 
     SortResult {
         array,
-        algorithm: String::from("Bubble Sort"),
+        algorithm: String::from("Heap Sort"),
         comparisons,
         swaps,
         shifts,

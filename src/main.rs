@@ -6,7 +6,8 @@ use rust_sorting_algorithms::{
         generate_data, read_array::read_array, read_input, sort_result::SortResult, write_array,
     },
     sort::{
-        bogo_sort, bubble_sort, insertion_sort, merge_sort, quick_sort, selection_sort, shell_sort,
+        bogo_sort, bubble_sort, heap_sort, insertion_sort, merge_sort, quick_sort, selection_sort,
+        shell_sort,
     },
 };
 
@@ -80,11 +81,12 @@ fn main() {
  3 - Selection Sort
  4 - Insertion Sort
  5 - Shell Sort
- 6 - ???
+ 6 - Heap Sort
  7 - Merge Sort
  8 - Quick Sort
  9 - ???
 10 - ???
+11 - ???
  0 - Exit
 ===========================================
 "
@@ -115,7 +117,10 @@ fn main() {
                         clear().expect("Error: clear failed");
                         shell_sort::sort(array)
                     }
-                    //heap Sort
+                    6 => {
+                        clear().expect("Error: clear failed");
+                        heap_sort::sort(array)
+                    }
                     7 => {
                         clear().expect("Error: clear failed");
                         merge_sort::sort(array)
@@ -125,6 +130,7 @@ fn main() {
                         quick_sort::sort(array)
                     }
                     //Time Sort
+                    //Bucket Sort
                     //Radix Sort
                     0 => return,
                     _ => {

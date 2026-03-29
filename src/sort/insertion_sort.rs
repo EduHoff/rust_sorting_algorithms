@@ -72,10 +72,10 @@ mod tests {
 
     #[test]
     fn sort_array() {
-        let array: Vec<i32> = (1..10).rev().collect();
+        let array: Vec<i32> = (1..=10).rev().collect();
 
         let result = sort(array);
-        let expected: Vec<i32> = (1..10).collect();
+        let expected: Vec<i32> = (1..=10).collect();
 
         assert_eq!(
             result.array, expected,
