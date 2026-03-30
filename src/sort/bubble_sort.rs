@@ -29,7 +29,7 @@ pub fn sort<T: PartialOrd + Copy>(mut array: Vec<T>) -> SortResult<T> {
         for j in 0..(array.len() - (i + 1)) {
             comparisons += 1;
 
-            if array[j] < array[j + 1] {
+            if array[j] > array[j + 1] {
                 array.swap(j, j + 1);
 
                 swaps += 1;

@@ -228,6 +228,11 @@ impl<T: std::fmt::Debug> SortResult<T> {
         writeln!(writer, "Algorithm:   {}", self.algorithm)?;
         writeln!(
             writer,
+            "Elements:    {}",
+            self.array.len().to_formatted_string(&Locale::en)
+        )?;
+        writeln!(
+            writer,
             "Comparisons: {}",
             self.comparisons.to_formatted_string(&Locale::en)
         )?;

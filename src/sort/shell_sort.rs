@@ -4,6 +4,8 @@ use indicatif::{ProgressBar, ProgressStyle};
 
 use crate::aux::sort_result::SortResult;
 
+const INTERVAL: usize = 3;
+
 pub fn sort<T: PartialOrd + Copy>(mut array: Vec<T>) -> SortResult<T> {
     let pb = ProgressBar::new(array.len() as u64);
     pb.set_style(
@@ -25,11 +27,11 @@ pub fn sort<T: PartialOrd + Copy>(mut array: Vec<T>) -> SortResult<T> {
 
     let mut gap = 1;
     while gap < array.len() {
-        gap = gap * 3 + 1;
+        gap = gap * INTERVAL + 1;
     }
 
     while gap >= 1 {
-        gap /= 3;
+        gap /= INTERVAL;
         if gap == 0 {
             break;
         }
@@ -48,7 +50,9 @@ pub fn sort<T: PartialOrd + Copy>(mut array: Vec<T>) -> SortResult<T> {
             }
 
             array[j] = key_array;
+
             insertions += 1;
+            pb.set_position(i as u64);
         }
     }
 

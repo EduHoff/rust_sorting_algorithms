@@ -6,8 +6,8 @@ use rust_sorting_algorithms::{
         generate_data, read_array::read_array, read_input, sort_result::SortResult, write_array,
     },
     sort::{
-        bogo_sort, bubble_sort, heap_sort, insertion_sort, merge_sort, quick_sort, selection_sort,
-        shell_sort,
+        bogo_sort, bubble_sort, heap_sort, insertion_sort, merge_sort, quick_sort, radix_sort,
+        selection_sort, shell_sort,
     },
 };
 
@@ -53,7 +53,6 @@ fn main() {
                 Err(e) => {
                     clear().expect("Error: clear failed");
                     eprintln!("{}", e);
-                    0
                 }
             };
         }
@@ -66,8 +65,8 @@ fn main() {
         generate_data::generate_data(min, max, PATH_IN);
     }
 
-    let array: Vec<u32> = read_array(PATH_IN);
-    let result: SortResult<u32>;
+    let array: Vec<usize> = read_array(PATH_IN);
+    let result: SortResult<usize>;
 
     clear().expect("Error: clear failed");
     loop {
@@ -76,18 +75,16 @@ fn main() {
 ============================================
             Sorting Algorithms
 ============================================
- 1 - Bogo Sort
- 2 - Bubble Sort
- 3 - Selection Sort
- 4 - Insertion Sort
- 5 - Shell Sort
- 6 - Heap Sort
- 7 - Merge Sort
- 8 - Quick Sort
- 9 - ???
-10 - ???
-11 - ???
- 0 - Exit
+1 - Bogo Sort
+2 - Bubble Sort
+3 - Selection Sort
+4 - Insertion Sort
+5 - Shell Sort
+6 - Heap Sort
+7 - Merge Sort
+8 - Quick Sort
+9 - Radix Sort
+0 - Exit
 ===========================================
 "
         );
@@ -129,9 +126,10 @@ fn main() {
                         clear().expect("Error: clear failed");
                         quick_sort::sort(array)
                     }
-                    //Time Sort
-                    //Bucket Sort
-                    //Radix Sort
+                    9 => {
+                        clear().expect("Error: clear failed");
+                        radix_sort::sort(array)
+                    }
                     0 => return,
                     _ => {
                         clear().expect("Error: clear failed");
@@ -166,5 +164,4 @@ fn main() {
         .arg("/c")
         .arg("pause")
         .status();
-    //cargo cross build --release --target x86_64-pc-windows-gnu
 }
