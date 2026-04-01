@@ -8,8 +8,8 @@ fn quick_sort<T: PartialOrd + Copy>(
     array: &mut Vec<T>,
     index_left: usize,
     index_right: usize,
-    comparisons: &mut usize,
-    swaps: &mut usize,
+    comparisons: &mut u64,
+    swaps: &mut u64,
     pb: &ProgressBar,
 ) {
     let mut left_i: usize = index_left;
@@ -60,12 +60,12 @@ pub fn sort<T: PartialOrd + Copy>(mut array: Vec<T>) -> SortResult<T> {
         .progress_chars("#>-"),
     );
 
-    let mut comparisons: usize = 0;
-    let mut swaps: usize = 0;
-    let shifts: usize = 0;
-    let insertions: usize = 0;
-    let moves: usize = 0;
-    let attempts: usize = 0;
+    let mut comparisons: u64 = 0;
+    let mut swaps: u64 = 0;
+    let shifts: u64 = 0;
+    let insertions: u64 = 0;
+    let moves: u64 = 0;
+    let attempts: u64 = 0;
 
     let start = Instant::now();
 
@@ -81,7 +81,7 @@ pub fn sort<T: PartialOrd + Copy>(mut array: Vec<T>) -> SortResult<T> {
         &pb,
     );
 
-    let duration: usize = start.elapsed().as_nanos() as usize;
+    let duration: u128 = start.elapsed().as_nanos();
     pb.finish_with_message("Sorting completed!");
 
     SortResult {
@@ -103,10 +103,10 @@ mod tests {
 
     #[test]
     fn sort_array() {
-        let array: Vec<i32> = (1..=10).rev().collect();
+        let array: Vec<u64> = (1..=10).rev().collect();
 
         let result = sort(array);
-        let expected: Vec<i32> = (1..=10).collect();
+        let expected: Vec<u64> = (1..=10).collect();
 
         assert_eq!(
             result.array, expected,

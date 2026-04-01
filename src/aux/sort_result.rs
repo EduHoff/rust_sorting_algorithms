@@ -10,19 +10,19 @@ use wgpu::Instance;
 pub struct SortResult<T> {
     pub array: Vec<T>,
     pub algorithm: String,
-    pub comparisons: usize,
-    pub swaps: usize,
-    pub shifts: usize,
-    pub insertions: usize,
-    pub moves: usize,
-    pub attempts: usize,
-    pub duration: usize,
+    pub comparisons: u64,
+    pub swaps: u64,
+    pub shifts: u64,
+    pub insertions: u64,
+    pub moves: u64,
+    pub attempts: u64,
+    pub duration: u128,
 }
 
 struct SystemInfo {
     pub os: String,
     pub cpu: String,
-    pub ram_gb: usize,
+    pub ram_gb: u64,
 }
 
 fn get_system_info() -> SystemInfo {
@@ -39,8 +39,8 @@ fn get_system_info() -> SystemInfo {
         .map(|c| c.brand().to_string())
         .unwrap_or("Unknown CPU".to_string());
 
-    let total_ram: usize = sys.total_memory() as usize;
-    let ram_gb: usize = total_ram / 1024 / 1024 / 1024;
+    let total_ram: u64 = sys.total_memory();
+    let ram_gb: u64 = total_ram / 1024 / 1024 / 1024;
 
     SystemInfo {
         os: full_os,

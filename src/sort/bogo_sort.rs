@@ -6,7 +6,7 @@ use rand::{seq::SliceRandom, thread_rng};
 
 use crate::aux::sort_result::SortResult;
 
-fn is_sorted<T: PartialOrd + Copy>(array: &[T], comparisons: &mut usize) -> bool {
+fn is_sorted<T: PartialOrd + Copy>(array: &[T], comparisons: &mut u64) -> bool {
     for i in 0..array.len() - 1 {
         *comparisons += 1;
         if array[i] > array[i + 1] {
@@ -27,12 +27,12 @@ pub fn sort<T: PartialOrd + Copy>(mut array: Vec<T>) -> SortResult<T> {
         .progress_chars("#>-"),
     );
 
-    let mut comparisons: usize = 0;
-    let mut swaps: usize = 0;
-    let shifts: usize = 0;
-    let insertions: usize = 0;
-    let moves: usize = 0;
-    let mut attempts: usize = 0;
+    let mut comparisons: u64 = 0;
+    let mut swaps: u64 = 0;
+    let shifts: u64 = 0;
+    let insertions: u64 = 0;
+    let moves: u64 = 0;
+    let mut attempts: u64 = 0;
 
     let start = Instant::now();
 
@@ -41,11 +41,14 @@ pub fn sort<T: PartialOrd + Copy>(mut array: Vec<T>) -> SortResult<T> {
         array.shuffle(&mut rng);
 
         attempts += 1;
-        swaps += array.len().saturating_sub(1);
-        pb.set_message(format!("Attempts: {}", attempts.to_formatted_string(&Locale::en)));
+        swaps += array.len().saturating_sub(1) as u64;
+        pb.set_message(format!(
+            "Attempts: {}",
+            attempts.to_formatted_string(&Locale::en)
+        ));
     }
 
-    let duration: usize = start.elapsed().as_nanos() as usize;
+    let duration: u128 = start.elapsed().as_nanos();
     pb.finish_with_message("Sorting completed!");
 
     SortResult {
@@ -67,8 +70,8 @@ mod tests {
 
     #[test]
     fn test_is_sorted() {
-        let array: Vec<i32> = (1..10).collect();
-        let mut comparisons: usize = 0;
+        let array: Vec<u64> = (1..10).collect();
+        let mut comparisons: u64 = 0;
 
         let result = is_sorted(&array, &mut comparisons);
         assert!(result);
@@ -76,10 +79,10 @@ mod tests {
 
     #[test]
     fn sort_array() {
-        let array: Vec<i32> = (1..=3).rev().collect();
+        let array: Vec<u64> = (1..=3).rev().collect();
 
         let result = sort(array);
-        let expected: Vec<i32> = (1..=3).collect();
+        let expected: Vec<u64> = (1..=3).collect();
 
         assert_eq!(
             result.array, expected,

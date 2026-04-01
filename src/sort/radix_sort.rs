@@ -20,8 +20,8 @@ fn counting_sort(
     array: &mut [usize],
     aux_array: &mut [usize],
     shift: usize,
-    metric_shifts: &mut usize,
-    moves: &mut usize,
+    metric_shifts: &mut u64,
+    moves: &mut u64,
     pb: &ProgressBar,
 ) {
     let mut bucket_positions = [0usize; 256];
@@ -50,7 +50,7 @@ fn counting_sort(
     }
 
     array.copy_from_slice(aux_array);
-    *moves += array.len();
+    *moves += array.len() as u64;
 }
 
 pub fn sort(mut array: Vec<usize>) -> SortResult<usize> {
@@ -65,12 +65,12 @@ pub fn sort(mut array: Vec<usize>) -> SortResult<usize> {
         .progress_chars("#>-"),
     );
 
-    let comparisons: usize = 0;
-    let swaps: usize = 0;
-    let mut metric_shifts: usize = 0;
-    let insertions: usize = 0;
-    let mut moves: usize = 0;
-    let attempts: usize = 0;
+    let comparisons: u64 = 0;
+    let swaps: u64 = 0;
+    let mut metric_shifts: u64 = 0;
+    let insertions: u64 = 0;
+    let mut moves: u64 = 0;
+    let attempts: u64 = 0;
 
     let start = Instant::now();
 
@@ -89,7 +89,7 @@ pub fn sort(mut array: Vec<usize>) -> SortResult<usize> {
         );
     }
 
-    let duration: usize = start.elapsed().as_nanos() as usize;
+    let duration: u128 = start.elapsed().as_nanos();
     pb.finish_with_message("Sorting completed!");
 
     SortResult {
