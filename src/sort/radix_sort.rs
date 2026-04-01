@@ -59,7 +59,7 @@ pub fn sort(mut array: Vec<usize>) -> SortResult<usize> {
     let pb = ProgressBar::new((array.len() * total_bytes_to_process) as u64);
     pb.set_style(
         ProgressStyle::with_template(
-            "{spinner:.green} [{elapsed_precise}] [{bar:40.cyan/blue}] {pos}/{len} ({eta})",
+            "{spinner:.green} [{elapsed_precise}] [{bar:40.cyan/blue}] {human_pos}/{human_len} ({eta})",
         )
         .unwrap()
         .progress_chars("#>-"),

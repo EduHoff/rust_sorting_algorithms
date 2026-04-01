@@ -1,6 +1,7 @@
 use std::time::Instant;
 
 use indicatif::{ProgressBar, ProgressStyle};
+use num_format::{Locale, ToFormattedString};
 use rand::{seq::SliceRandom, thread_rng};
 
 use crate::aux::sort_result::SortResult;
@@ -41,7 +42,7 @@ pub fn sort<T: PartialOrd + Copy>(mut array: Vec<T>) -> SortResult<T> {
 
         attempts += 1;
         swaps += array.len().saturating_sub(1);
-        pb.set_message(format!("Attempts: {}", attempts));
+        pb.set_message(format!("Attempts: {}", attempts.to_formatted_string(&Locale::en)));
     }
 
     let duration: usize = start.elapsed().as_nanos() as usize;

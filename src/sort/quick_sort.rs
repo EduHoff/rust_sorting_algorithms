@@ -54,7 +54,7 @@ pub fn sort<T: PartialOrd + Copy>(mut array: Vec<T>) -> SortResult<T> {
     let pb = ProgressBar::new(array.len() as u64);
     pb.set_style(
         ProgressStyle::with_template(
-            "{spinner:.green} [{elapsed_precise}] [{bar:40.cyan/blue}] {pos}/{len} ({eta})",
+            "{spinner:.green} [{elapsed_precise}] [{bar:40.cyan/blue}] {human_pos}/{human_len} ({eta})",
         )
         .unwrap()
         .progress_chars("#>-"),

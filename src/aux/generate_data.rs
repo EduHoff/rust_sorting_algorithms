@@ -8,7 +8,7 @@ pub fn generate_data(min: usize, max: usize, path: &str) {
     let pb = ProgressBar::new((max - min + 1) as u64);
     pb.set_style(
         ProgressStyle::with_template(
-            "{spinner:.green} [{elapsed_precise}] [{bar:40.cyan/blue}] {pos}/{len} ({eta})",
+            "{spinner:.green} [{elapsed_precise}] [{bar:40.cyan/blue}] {human_pos}/{human_len} ({eta})",
         )
         .unwrap()
         .progress_chars("#>-"),
