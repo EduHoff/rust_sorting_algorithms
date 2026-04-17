@@ -26,7 +26,6 @@ pub fn sort<T: PartialOrd + Copy>(mut array: Vec<T>) -> SortResult<T> {
     for i in 0..array.len() {
         let key = array[i];
         let mut key_index = i;
-        let mut shifted = false;
 
         for j in (0..i).rev() {
             comparisons += 1;
@@ -38,11 +37,10 @@ pub fn sort<T: PartialOrd + Copy>(mut array: Vec<T>) -> SortResult<T> {
             array[j + 1] = array[j];
             key_index = j;
 
-            shifted = true;
             shifts += 1;
         }
 
-        if shifted {
+        if key_index != i {
             array[key_index] = key;
             insertions += 1;
         }
