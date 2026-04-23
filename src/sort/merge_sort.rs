@@ -8,18 +8,22 @@ use indicatif::{ProgressBar, ProgressStyle};
 
 use crate::aux::sort_result::SortResult;
 
+const THREADS_LIMIT: usize = 100_000;
+
 fn merge<T: PartialOrd + Copy + Send + Sync>(
     array: &mut [T],
+    buffer: &mut [T],
     index_middle: usize,
     atomic_comparisons: &AtomicU64,
     atomic_moves: &AtomicU64,
     pb: &ProgressBar,
 ) {
-    let array_left = array[..index_middle].to_vec();
-    let array_right = array[index_middle..].to_vec();
+    buffer.copy_from_slice(array);
 
-    let left_array_len = array_left.len();
-    let right_array_len = array_right.len();
+    let (buffer_left, buffer_right) = buffer.split_at(index_middle);
+
+    let left_array_len = buffer_left.len();
+    let right_array_len = buffer_right.len();
 
     let mut left_i: usize = 0;
     let mut right_i: usize = 0;
@@ -28,43 +32,43 @@ fn merge<T: PartialOrd + Copy + Send + Sync>(
     while left_i < left_array_len && right_i < right_array_len {
         atomic_comparisons.fetch_add(1, Ordering::SeqCst);
 
-        if array_left[left_i] <= array_right[right_i] {
-            array[merged_i] = array_left[left_i];
+        if buffer_left[left_i] <= buffer_right[right_i] {
+            array[merged_i] = buffer_left[left_i];
             left_i += 1;
         } else {
-            array[merged_i] = array_right[right_i];
+            array[merged_i] = buffer_right[right_i];
             right_i += 1;
         }
 
         atomic_moves.fetch_add(1, Ordering::SeqCst);
-        pb.set_position(merged_i as u64);
 
         merged_i += 1;
     }
 
     while left_i < left_array_len {
-        array[merged_i] = array_left[left_i];
+        array[merged_i] = buffer_left[left_i];
 
         atomic_moves.fetch_add(1, Ordering::SeqCst);
-        pb.set_position(merged_i as u64);
 
         left_i += 1;
         merged_i += 1;
     }
 
     while right_i < right_array_len {
-        array[merged_i] = array_right[right_i];
+        array[merged_i] = buffer_right[right_i];
 
         atomic_moves.fetch_add(1, Ordering::SeqCst);
-        pb.set_position(merged_i as u64);
 
         right_i += 1;
         merged_i += 1;
     }
+
+    pb.inc(array.len() as u64);
 }
 
 fn merge_sort_parallel<T: PartialOrd + Copy + Send + Sync>(
     array: &mut [T],
+    buffer: &mut [T],
     atomic_comparisons: &AtomicU64,
     atomic_moves: &AtomicU64,
     pb: &ProgressBar,
@@ -76,22 +80,35 @@ fn merge_sort_parallel<T: PartialOrd + Copy + Send + Sync>(
     let middle = size_array / 2;
 
     let (left_part, right_part) = array.split_at_mut(middle);
+    let (left_buffer, right_buffer) = buffer.split_at_mut(middle);
 
-    if size_array > 1000 {
+    if size_array > THREADS_LIMIT {
         thread::scope(|s| {
             s.spawn(|| {
-                merge_sort_parallel(left_part, atomic_comparisons, atomic_moves, pb);
+                merge_sort_parallel(left_part, left_buffer, atomic_comparisons, atomic_moves, pb);
             });
             s.spawn(|| {
-                merge_sort_parallel(right_part, atomic_comparisons, atomic_moves, pb);
+                merge_sort_parallel(
+                    right_part,
+                    right_buffer,
+                    atomic_comparisons,
+                    atomic_moves,
+                    pb,
+                );
             });
         });
     } else {
-        merge_sort_parallel(left_part, atomic_comparisons, atomic_moves, pb);
-        merge_sort_parallel(right_part, atomic_comparisons, atomic_moves, pb);
+        merge_sort_parallel(left_part, left_buffer, atomic_comparisons, atomic_moves, pb);
+        merge_sort_parallel(
+            right_part,
+            right_buffer,
+            atomic_comparisons,
+            atomic_moves,
+            pb,
+        );
     }
 
-    merge(array, middle, atomic_comparisons, atomic_moves, pb);
+    merge(array, buffer, middle, atomic_comparisons, atomic_moves, pb);
 }
 
 pub fn sort<T: PartialOrd + Copy + Send + Sync>(mut array: Vec<T>) -> SortResult<T> {
@@ -116,7 +133,15 @@ pub fn sort<T: PartialOrd + Copy + Send + Sync>(mut array: Vec<T>) -> SortResult
 
     let start = Instant::now();
 
-    merge_sort_parallel(&mut array, &atomic_comparisons, &atomic_moves, &pb);
+    let mut buffer = array.clone();
+
+    merge_sort_parallel(
+        &mut array,
+        &mut buffer,
+        &atomic_comparisons,
+        &atomic_moves,
+        &pb,
+    );
 
     let duration: u128 = start.elapsed().as_nanos();
     pb.finish_with_message("Sorting completed!");
