@@ -8,8 +8,6 @@ use indicatif::{ProgressBar, ProgressStyle};
 
 use crate::aux::sort_result::SortResult;
 
-const THREADS_LIMIT: usize = 100_000;
-
 fn merge<T: PartialOrd + Copy + Send + Sync>(
     array: &mut [T],
     buffer: &mut [T],
@@ -69,6 +67,7 @@ fn merge<T: PartialOrd + Copy + Send + Sync>(
 fn merge_sort_parallel<T: PartialOrd + Copy + Send + Sync>(
     array: &mut [T],
     buffer: &mut [T],
+    dynamic_limit: usize,
     atomic_comparisons: &AtomicU64,
     atomic_moves: &AtomicU64,
     pb: &ProgressBar,
@@ -82,15 +81,23 @@ fn merge_sort_parallel<T: PartialOrd + Copy + Send + Sync>(
     let (left_part, right_part) = array.split_at_mut(middle);
     let (left_buffer, right_buffer) = buffer.split_at_mut(middle);
 
-    if size_array > THREADS_LIMIT {
+    if size_array > dynamic_limit {
         thread::scope(|s| {
             s.spawn(|| {
-                merge_sort_parallel(left_part, left_buffer, atomic_comparisons, atomic_moves, pb);
+                merge_sort_parallel(
+                    left_part,
+                    left_buffer,
+                    dynamic_limit,
+                    atomic_comparisons,
+                    atomic_moves,
+                    pb,
+                );
             });
             s.spawn(|| {
                 merge_sort_parallel(
                     right_part,
                     right_buffer,
+                    dynamic_limit,
                     atomic_comparisons,
                     atomic_moves,
                     pb,
@@ -98,10 +105,18 @@ fn merge_sort_parallel<T: PartialOrd + Copy + Send + Sync>(
             });
         });
     } else {
-        merge_sort_parallel(left_part, left_buffer, atomic_comparisons, atomic_moves, pb);
+        merge_sort_parallel(
+            left_part,
+            left_buffer,
+            dynamic_limit,
+            atomic_comparisons,
+            atomic_moves,
+            pb,
+        );
         merge_sort_parallel(
             right_part,
             right_buffer,
+            dynamic_limit,
             atomic_comparisons,
             atomic_moves,
             pb,
@@ -112,7 +127,16 @@ fn merge_sort_parallel<T: PartialOrd + Copy + Send + Sync>(
 }
 
 pub fn sort<T: PartialOrd + Copy + Send + Sync>(mut array: Vec<T>) -> SortResult<T> {
-    let pb = ProgressBar::new(array.len() as u64);
+    let n: u64 = array.len() as u64;
+    let log_n = (n as f64).log2().ceil() as u64;
+    let total_work = n * log_n;
+
+    let num_threads = thread::available_parallelism()
+        .map(|n| n.get())
+        .unwrap_or(1);
+    let dynamic_limit = (array.len() / (num_threads * 2)).max(1000);
+
+    let pb = ProgressBar::new(total_work);
     pb.set_style(
         ProgressStyle::with_template(
             "{spinner:.green} [{elapsed_precise}] [{bar:40.cyan/blue}] {human_pos}/{human_len} ({eta})",
@@ -138,6 +162,7 @@ pub fn sort<T: PartialOrd + Copy + Send + Sync>(mut array: Vec<T>) -> SortResult
     merge_sort_parallel(
         &mut array,
         &mut buffer,
+        dynamic_limit,
         &atomic_comparisons,
         &atomic_moves,
         &pb,
